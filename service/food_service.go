@@ -1,10 +1,11 @@
 package service
 
-import "golang-simple-boilerplate/model"
+import "github.com/fikryfahrezy/ffood/model"
 
 type FoodService interface {
-	Insert(Request model.FoodRequest, SellerId string) (Response model.FoodResponse, Error error)
-	GetAll() (Response []model.FoodResponse, Error error)
-	Get(Id string) (Response model.FoodResponse, Error error)
-	Delete(Id string, SellerId string) (Response model.FoodResponse, Error error)
+	Insert(Request model.InsertFoodRequest, SellerId int64) (Response model.InsertFoodResponse, Error error)
+	GetAll() (Response []model.InsertFoodResponse, Error error)
+	Get(Id string) (Response model.InsertFoodResponse, Error error)
+	Delete(Id string, SellerId int64) (Response model.InsertFoodResponse, Error error)
+	Update(Request model.UpdateFoodRequest, Id string, SellerId int64) (Response model.UpdateFoodResponse, Error error)
 }

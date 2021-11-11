@@ -1,6 +1,6 @@
 package repository
 
-import "golang-simple-boilerplate/model"
+import "github.com/fikryfahrezy/ffood/model"
 
 type UserRepository interface {
 	Profile(Request model.ProfileRequest) (Response model.ProfileResponse, Error error)

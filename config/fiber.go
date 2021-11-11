@@ -1,7 +1,7 @@
 package config
 
 import (
-	"golang-simple-boilerplate/exception"
+	"github.com/fikryfahrezy/ffood/exception"
 
 	"github.com/gofiber/fiber/v2"
 )

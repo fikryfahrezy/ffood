@@ -11,12 +11,13 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
 
-	"golang-simple-boilerplate/model"
+	"github.com/fikryfahrezy/ffood/model"
 )
 
 type DecodedStructure struct {
 	Id    uint64 `json:"id"`
 	Email string `json:"email"`
+	Role  string `json:"role"`
 }
 
 func ValidateToken(encodedToken string) (*jwt.Token, error) {
@@ -100,6 +101,7 @@ func CheckToken() func(*fiber.Ctx) error {
 		// set to global var
 		c.Locals("id", decodedRes.Id)
 		c.Locals("email", decodedRes.Email)
+		c.Locals("currentRole", decodedRes.Role)
 		return c.Next()
 	}
 }

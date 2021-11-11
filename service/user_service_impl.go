@@ -2,9 +2,9 @@ package service
 
 import (
 	"errors"
-	"golang-simple-boilerplate/helper"
-	"golang-simple-boilerplate/model"
-	"golang-simple-boilerplate/repository"
+	"github.com/fikryfahrezy/ffood/helper"
+	"github.com/fikryfahrezy/ffood/model"
+	"github.com/fikryfahrezy/ffood/repository"
 )
 
 type UserServiceImpl struct {

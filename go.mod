@@ -1,4 +1,4 @@
-module golang-simple-boilerplate
+module github.com/fikryfahrezy/ffood
 
 go 1.17
 

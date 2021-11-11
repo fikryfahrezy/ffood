@@ -2,10 +2,10 @@ package service
 
 import (
 	"errors"
-	"golang-simple-boilerplate/helper"
-	"golang-simple-boilerplate/model"
-	"golang-simple-boilerplate/repository"
-	"golang-simple-boilerplate/validation"
+	"github.com/fikryfahrezy/ffood/helper"
+	"github.com/fikryfahrezy/ffood/model"
+	"github.com/fikryfahrezy/ffood/repository"
+	"github.com/fikryfahrezy/ffood/validation"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"

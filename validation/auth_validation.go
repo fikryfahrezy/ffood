@@ -2,8 +2,8 @@ package validation
 
 import (
 	"encoding/json"
-	"golang-simple-boilerplate/exception"
-	"golang-simple-boilerplate/model"
+	"github.com/fikryfahrezy/ffood/exception"
+	"github.com/fikryfahrezy/ffood/model"
 
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 

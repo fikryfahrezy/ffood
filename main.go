@@ -1,11 +1,11 @@
 package main
 
 import (
-	"golang-simple-boilerplate/config"
-	"golang-simple-boilerplate/controller"
-	"golang-simple-boilerplate/exception"
-	"golang-simple-boilerplate/repository"
-	"golang-simple-boilerplate/service"
+	"github.com/fikryfahrezy/ffood/config"
+	"github.com/fikryfahrezy/ffood/controller"
+	"github.com/fikryfahrezy/ffood/exception"
+	"github.com/fikryfahrezy/ffood/repository"
+	"github.com/fikryfahrezy/ffood/service"
 	"os"
 
 	"github.com/gofiber/fiber/v2"

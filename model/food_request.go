@@ -1,5 +1,9 @@
 package model
 
-type FoodRequest struct {
+type InsertFoodRequest struct {
+	Name string `json:"name"`
+}
+
+type UpdateFoodRequest struct {
 	Name string `json:"name"`
 }

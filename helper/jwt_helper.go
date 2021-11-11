@@ -1,7 +1,7 @@
 package helper
 
 import (
-	"golang-simple-boilerplate/exception"
+	"github.com/fikryfahrezy/ffood/exception"
 	"os"
 
 	"github.com/dgrijalva/jwt-go"

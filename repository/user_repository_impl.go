@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"golang-simple-boilerplate/entity"
-	"golang-simple-boilerplate/model"
+	"github.com/fikryfahrezy/ffood/entity"
+	"github.com/fikryfahrezy/ffood/model"
 
 	"gorm.io/gorm"
 )
@@ -24,16 +24,28 @@ func (Repository UserRepositoryImpl) Profile(Request model.ProfileRequest) (Resp
 	}
 	Response.Id = user.Id
 	Response.Email = user.Email
+	Response.Name = user.Name
+	Response.Role = user.Role
 	return
 }
 
 func (Repository UserRepositoryImpl) UpdateProfile(Request model.UpdateProfileRequest) (Response model.UpdateProfileResponse, Error error) {
 	var user entity.User
-	Error = Repository.Mysql.Model(&user).Where("email = ?", Request.Email).Updates(entity.User{
-		Name:     Request.Name,
-		Password: Request.Password,
-	}).Error
-	Response.Email = Request.Email
-	Response.Name = Request.Name
+	Error = Repository.Mysql.Where("email = ?", Request.Email).First(&user).Error
+	if Error != nil {
+		return
+	}
+
+	user.Name = Request.Name
+	user.Password = Request.Password
+	Error = Repository.Mysql.Save(&user).Error
+	if Error != nil {
+		return
+	}
+
+	Response.Id = user.Id
+	Response.Email = user.Email
+	Response.Name = user.Name
+	Response.Role = user.Role
 	return
 }

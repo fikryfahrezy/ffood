@@ -1,6 +1,6 @@
 package service
 
-import "golang-simple-boilerplate/model"
+import "github.com/fikryfahrezy/ffood/model"
 
 type UserService interface {
 	Profile(Request model.ProfileRequest) (Response model.ProfileResponse, Error error)

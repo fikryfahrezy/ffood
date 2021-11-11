@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"golang-simple-boilerplate/entity"
-	"golang-simple-boilerplate/model"
+	"github.com/fikryfahrezy/ffood/entity"
+	"github.com/fikryfahrezy/ffood/model"
 
 	"gorm.io/gorm"
 )

@@ -1,6 +1,6 @@
 package repository
 
-import "golang-simple-boilerplate/model"
+import "github.com/fikryfahrezy/ffood/model"
 
 type AuthRepository interface {
 	Register(Request model.RegisterRequest) (Response model.RegisterResponse, Error error)

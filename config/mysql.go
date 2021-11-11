@@ -3,7 +3,7 @@ package config
 import (
 	"context"
 	"database/sql"
-	"golang-simple-boilerplate/exception"
+	"github.com/fikryfahrezy/ffood/exception"
 	"os"
 	"strconv"
 	"time"

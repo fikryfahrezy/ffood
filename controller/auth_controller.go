@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"golang-simple-boilerplate/exception"
-	"golang-simple-boilerplate/model"
-	"golang-simple-boilerplate/service"
+	"github.com/fikryfahrezy/ffood/exception"
+	"github.com/fikryfahrezy/ffood/model"
+	"github.com/fikryfahrezy/ffood/service"
 
 	"github.com/gofiber/fiber/v2"
 )

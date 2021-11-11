@@ -2,7 +2,7 @@ package exception
 
 import (
 	"encoding/json"
-	"golang-simple-boilerplate/model"
+	"github.com/fikryfahrezy/ffood/model"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
