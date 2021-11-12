@@ -60,21 +60,21 @@ func (Controller AuthController) Login(c *fiber.Ctx) error {
 	if err != nil {
 		return exception.ErrorHandler(c, err)
 	}
-	if verified {
-		return c.Status(fiber.StatusOK).JSON(model.Response{
-			Code:   fiber.StatusOK,
-			Status: "OK",
-			Data:   response,
-			Error:  nil,
+	if !verified {
+		return c.Status(fiber.StatusUnauthorized).JSON(model.Response{
+			Code:   fiber.StatusUnauthorized,
+			Status: "Unauthorized",
+			Data:   nil,
+			Error: model.GeneralError{
+				General: "AUTHENTICATION_FAILURE",
+			},
 		})
 	}
 
-	return c.Status(fiber.StatusUnauthorized).JSON(model.Response{
-		Code:   fiber.StatusUnauthorized,
-		Status: "Unauthorized",
-		Data:   nil,
-		Error: model.GeneralError{
-			General: "AUTHENTICATION_FAILURE",
-		},
+	return c.Status(fiber.StatusOK).JSON(model.Response{
+		Code:   fiber.StatusOK,
+		Status: "OK",
+		Data:   response,
+		Error:  nil,
 	})
 }

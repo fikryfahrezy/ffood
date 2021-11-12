@@ -36,8 +36,13 @@ func (Repository UserRepositoryImpl) UpdateProfile(Request model.UpdateProfileRe
 		return
 	}
 
-	user.Name = Request.Name
-	user.Password = Request.Password
+	if Request.Name != "" {
+		user.Name = Request.Name
+	}
+	if Request.Password != "" {
+		user.Password = Request.Password
+	}
+
 	Error = Repository.Mysql.Save(&user).Error
 	if Error != nil {
 		return

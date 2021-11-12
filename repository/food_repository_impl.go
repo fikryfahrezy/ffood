@@ -17,12 +17,12 @@ func NewFoodRepository(Mysql *gorm.DB) FoodRepository {
 	}
 }
 
-func (Repository FoodRepositoryImpl) Insert(Request model.InsertFoodRequest, SellerId int64) (Response model.InsertFoodResponse, Error error) {
+func (Repository FoodRepositoryImpl) InsertFood(Request model.InsertFoodRequest, SellerId int64) (Response model.InsertFoodResponse, Error error) {
 	food := entity.Food{
 		Name:     Request.Name,
 		SellerId: SellerId,
 	}
-	Error = Repository.Mysql.Create(&food).Error
+	Error = Repository.Mysql.Preload("Seller").Create(&food).Error
 	if Error != nil {
 		return
 	}
@@ -30,13 +30,13 @@ func (Repository FoodRepositoryImpl) Insert(Request model.InsertFoodRequest, Sel
 	Response.Id = food.Id
 	Response.Name = food.Name
 	Response.SellerId = food.SellerId
-	//Response.Seller = food.Seller
+	Response.Seller = food.Seller
 	return
 }
 
-func (Repository FoodRepositoryImpl) GetAll() (Response []model.InsertFoodResponse) {
+func (Repository FoodRepositoryImpl) GetAllFood() (Response []model.InsertFoodResponse) {
 	var foods []entity.Food
-	Repository.Mysql.Where("is_deleted = ?", 0).Find(&foods)
+	Repository.Mysql.Where("is_deleted = ?", 0).Preload("Seller").Find(&foods)
 
 	Response = make([]model.InsertFoodResponse, len(foods))
 	for i, food := range foods {
@@ -44,28 +44,28 @@ func (Repository FoodRepositoryImpl) GetAll() (Response []model.InsertFoodRespon
 			Id:       food.Id,
 			Name:     food.Name,
 			SellerId: food.SellerId,
-			//Seller:   food.Seller,
+			Seller:   food.Seller,
 		}
 	}
 	return
 }
 
-func (Repository FoodRepositoryImpl) Get(Id string) (Response model.InsertFoodResponse, Error error) {
+func (Repository FoodRepositoryImpl) GetFood(Id string) (Response model.InsertFoodResponse, Error error) {
 	var food entity.Food
-	Error = Repository.Mysql.First(&food, "id = ? AND is_deleted = ?", Id, 0).Error
+	Error = Repository.Mysql.Preload("Seller").First(&food, "id = ? AND is_deleted = ?", Id, 0).Error
 	if Error != nil {
 		return
 	}
 	Response.Id = food.Id
 	Response.Name = food.Name
 	Response.SellerId = food.SellerId
-	//Response.Seller = food.Seller
+	Response.Seller = food.Seller
 	return
 }
 
-func (Repository FoodRepositoryImpl) Delete(Id string, SellerId int64) (Response model.InsertFoodResponse, Error error) {
+func (Repository FoodRepositoryImpl) DeleteFood(Id string, SellerId int64) (Response model.InsertFoodResponse, Error error) {
 	var food entity.Food
-	Error = Repository.Mysql.First(&food, "id = ? AND seller_id = ? AND is_deleted = ?", Id, SellerId, 0).Error
+	Error = Repository.Mysql.Preload("Seller").First(&food, "id = ? AND seller_id = ? AND is_deleted = ?", Id, SellerId, 0).Error
 	if Error != nil {
 		return
 	}
@@ -78,13 +78,13 @@ func (Repository FoodRepositoryImpl) Delete(Id string, SellerId int64) (Response
 	Response.Id = food.Id
 	Response.Name = food.Name
 	Response.SellerId = food.SellerId
-	//Response.Seller = food.Seller
+	Response.Seller = food.Seller
 	return
 }
 
-func (Repository FoodRepositoryImpl) Update(Request model.UpdateFoodRequest, Id string, SellerId int64) (Response model.UpdateFoodResponse, Error error) {
+func (Repository FoodRepositoryImpl) UpdateFood(Request model.UpdateFoodRequest, Id string, SellerId int64) (Response model.UpdateFoodResponse, Error error) {
 	var food entity.Food
-	Error = Repository.Mysql.First(&food, "id = ? AND seller_id = ? AND is_deleted = ?", Id, SellerId, 0).Error
+	Error = Repository.Mysql.Preload("Seller").First(&food, "id = ? AND seller_id = ? AND is_deleted = ?", Id, SellerId, 0).Error
 	if Error != nil {
 		return
 	}
@@ -97,6 +97,6 @@ func (Repository FoodRepositoryImpl) Update(Request model.UpdateFoodRequest, Id 
 	Response.Id = food.Id
 	Response.Name = food.Name
 	Response.SellerId = food.SellerId
-	//Response.Seller = food.Seller
+	Response.Seller = food.Seller
 	return
 }

@@ -33,7 +33,7 @@ func (Controller FoodController) InsertFood(c *fiber.Ctx) error {
 	if err := c.BodyParser(request); err != nil {
 		return exception.ErrorHandler(c, err)
 	}
-	response, err := Controller.FoodService.Insert(model.InsertFoodRequest{
+	response, err := Controller.FoodService.InsertFood(model.InsertFoodRequest{
 		Name: request.Name,
 	}, int64(c.Locals("id").(uint64)))
 	if err != nil {
@@ -49,7 +49,7 @@ func (Controller FoodController) InsertFood(c *fiber.Ctx) error {
 }
 
 func (Controller FoodController) GetFoods(c *fiber.Ctx) error {
-	response, err := Controller.FoodService.GetAll()
+	response, err := Controller.FoodService.GetAllFood()
 	if err != nil {
 		return exception.ErrorHandler(c, err)
 	}
@@ -64,7 +64,7 @@ func (Controller FoodController) GetFoods(c *fiber.Ctx) error {
 
 func (Controller FoodController) GetFood(c *fiber.Ctx) error {
 	id := c.Params("id")
-	response, err := Controller.FoodService.Get(id)
+	response, err := Controller.FoodService.GetFood(id)
 	if err != nil {
 		return exception.ErrorHandler(c, err)
 	}
@@ -79,7 +79,7 @@ func (Controller FoodController) GetFood(c *fiber.Ctx) error {
 
 func (Controller FoodController) DeleteFood(c *fiber.Ctx) error {
 	id := c.Params("id")
-	response, err := Controller.FoodService.Delete(id, int64(c.Locals("id").(uint64)))
+	response, err := Controller.FoodService.DeleteFood(id, int64(c.Locals("id").(uint64)))
 	if err != nil {
 		return exception.ErrorHandler(c, err)
 	}
@@ -98,7 +98,7 @@ func (Controller FoodController) UpdateFood(c *fiber.Ctx) error {
 	if err := c.BodyParser(request); err != nil {
 		return exception.ErrorHandler(c, err)
 	}
-	response, err := Controller.FoodService.Update(model.UpdateFoodRequest{
+	response, err := Controller.FoodService.UpdateFood(model.UpdateFoodRequest{
 		Name: request.Name,
 	}, id, int64(c.Locals("id").(uint64)))
 	if err != nil {

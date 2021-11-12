@@ -16,31 +16,30 @@ func NewFoodService(FoodRepository *repository.FoodRepository) FoodService {
 	}
 }
 
-func (Service FoodServiceImpl) Insert(Request model.InsertFoodRequest, SellerId int64) (Response model.InsertFoodResponse, Error error) {
+func (Service FoodServiceImpl) InsertFood(Request model.InsertFoodRequest, SellerId int64) (Response model.InsertFoodResponse, Error error) {
 	if Error = validation.InsertFoodValidation(Request); Error != nil {
 		return
 	}
-	Response, Error = Service.FoodRepository.Insert(Request, SellerId)
+	Response, Error = Service.FoodRepository.InsertFood(Request, SellerId)
 	return
 }
 
-func (Service FoodServiceImpl) GetAll() (Response []model.InsertFoodResponse, Error error) {
-	Response = Service.FoodRepository.GetAll()
+func (Service FoodServiceImpl) GetAllFood() (Response []model.InsertFoodResponse, Error error) {
+	Response = Service.FoodRepository.GetAllFood()
 	return
 }
 
-func (Service FoodServiceImpl) Get(Id string) (Response model.InsertFoodResponse, Error error) {
-
-	Response, Error = Service.FoodRepository.Get(Id)
+func (Service FoodServiceImpl) GetFood(Id string) (Response model.InsertFoodResponse, Error error) {
+	Response, Error = Service.FoodRepository.GetFood(Id)
 	return
 }
 
-func (Service FoodServiceImpl) Delete(Id string, SellerId int64) (Response model.InsertFoodResponse, Error error) {
-	Response, Error = Service.FoodRepository.Delete(Id, SellerId)
+func (Service FoodServiceImpl) DeleteFood(Id string, SellerId int64) (Response model.InsertFoodResponse, Error error) {
+	Response, Error = Service.FoodRepository.DeleteFood(Id, SellerId)
 	return
 }
 
-func (Service FoodServiceImpl) Update(Request model.UpdateFoodRequest, Id string, SellerId int64) (Response model.UpdateFoodResponse, Error error) {
-	Response, Error = Service.FoodRepository.Update(Request, Id, SellerId)
+func (Service FoodServiceImpl) UpdateFood(Request model.UpdateFoodRequest, Id string, SellerId int64) (Response model.UpdateFoodResponse, Error error) {
+	Response, Error = Service.FoodRepository.UpdateFood(Request, Id, SellerId)
 	return
 }
