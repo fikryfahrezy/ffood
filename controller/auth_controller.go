@@ -12,18 +12,6 @@ type AuthController struct {
 	AuthService service.AuthService
 }
 
-func NewAuthController(AuthService *service.AuthService) AuthController {
-	return AuthController{
-		AuthService: *AuthService,
-	}
-}
-
-func (Controller AuthController) Route(App fiber.Router) {
-	router := App.Group("/auth")
-	router.Post("/register", Controller.Register)
-	router.Post("/login", Controller.Login)
-}
-
 func (Controller AuthController) Register(c *fiber.Ctx) error {
 	request := new(model.RegisterRequest)
 	if err := c.BodyParser(request); err != nil {
@@ -77,4 +65,16 @@ func (Controller AuthController) Login(c *fiber.Ctx) error {
 		Data:   response,
 		Error:  nil,
 	})
+}
+
+func (Controller AuthController) Route(App fiber.Router) {
+	router := App.Group("/auth")
+	router.Post("/register", Controller.Register)
+	router.Post("/login", Controller.Login)
+}
+
+func NewAuthController(AuthService *service.AuthService) AuthController {
+	return AuthController{
+		AuthService: *AuthService,
+	}
 }

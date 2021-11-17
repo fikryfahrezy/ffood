@@ -13,21 +13,6 @@ type FoodController struct {
 	FoodService service.FoodService
 }
 
-func NewFoodController(FoodService *service.FoodService) FoodController {
-	return FoodController{
-		FoodService: *FoodService,
-	}
-}
-
-func (Controller FoodController) Route(App fiber.Router) {
-	router := App.Group("/foods")
-	router.Post("", middleware.CheckToken(), middleware.CheckRole("seller"), Controller.InsertFood)
-	router.Get("", Controller.GetFoods)
-	router.Get("/:id", Controller.GetFood)
-	router.Delete("/:id", middleware.CheckToken(), middleware.CheckRole("seller"), Controller.DeleteFood)
-	router.Patch("/:id", middleware.CheckToken(), middleware.CheckRole("seller"), Controller.UpdateFood)
-}
-
 func (Controller FoodController) InsertFood(c *fiber.Ctx) error {
 	request := new(model.InsertFoodRequest)
 	if err := c.BodyParser(request); err != nil {
@@ -111,4 +96,19 @@ func (Controller FoodController) UpdateFood(c *fiber.Ctx) error {
 		Data:   response,
 		Error:  nil,
 	})
+}
+
+func (Controller FoodController) Route(App fiber.Router) {
+	router := App.Group("/foods")
+	router.Post("", middleware.CheckToken(), middleware.CheckRole("seller"), Controller.InsertFood)
+	router.Get("", Controller.GetFoods)
+	router.Get("/:id", Controller.GetFood)
+	router.Delete("/:id", middleware.CheckToken(), middleware.CheckRole("seller"), Controller.DeleteFood)
+	router.Patch("/:id", middleware.CheckToken(), middleware.CheckRole("seller"), Controller.UpdateFood)
+}
+
+func NewFoodController(FoodService *service.FoodService) FoodController {
+	return FoodController{
+		FoodService: *FoodService,
+	}
 }

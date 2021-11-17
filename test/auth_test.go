@@ -48,7 +48,7 @@ func TestRegister(t *testing.T) {
 			},
 			method:             "POST",
 			url:                "/auth/register",
-			body:               `{"email": "email1@email.com", "password": "password", "name": "Name"}`,
+			body:               `{"email": "email@email.com", "password": "password", "name": "Name"}`,
 			expectedStatusCode: http.StatusOK,
 		},
 		{

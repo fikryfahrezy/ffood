@@ -1,11 +1,16 @@
 package test
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/fikryfahrezy/ffood/entity"
+
+	"github.com/fikryfahrezy/ffood/model"
 
 	"github.com/fikryfahrezy/ffood/config"
 	"github.com/fikryfahrezy/ffood/controller"
@@ -30,7 +35,7 @@ func foodTrxInit(gormDb *gorm.DB) (app *fiber.App, foodTrxService service.FoodTr
 
 func TestInsertFoodTrx(t *testing.T) {
 	gormDb := dbInit()
-	app, _, _, _ := foodInit(gormDb)
+	app, _, _, authService := foodTrxInit(gormDb)
 	clearDb(gormDb)
 
 	testCases := []struct {
@@ -40,7 +45,97 @@ func TestInsertFoodTrx(t *testing.T) {
 		url                string
 		body               string
 		expectedStatusCode int
-	}{}
+	}{
+		{
+			testName: "Insert Food Trx Success",
+			init: func(req *http.Request) {
+				user := model.RegisterRequest{
+					Email:    "email9@email.com",
+					Name:     "Name",
+					Password: "password",
+				}
+				response, _ := authService.Register(user)
+
+				food := entity.Food{
+					Id:       1,
+					Name:     "Name",
+					SellerId: response.Id,
+				}
+				gormDb.Create(&food)
+
+				req.Header.Add("Content-Type", "application/json")
+				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", response.AccessToken))
+			},
+			method:             "POST",
+			url:                "/foodtransactions",
+			body:               `{"food_id": 1}`,
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			testName: "Insert Food Trx Fail, Food Id Not Found",
+			init: func(req *http.Request) {
+				user := model.RegisterRequest{
+					Email:    "email10@email.com",
+					Name:     "Name",
+					Password: "password",
+				}
+				response, _ := authService.Register(user)
+
+				req.Header.Add("Content-Type", "application/json")
+				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", response.AccessToken))
+			},
+			method:             "POST",
+			url:                "/foodtransactions",
+			body:               `{"food_id": 2}`,
+			expectedStatusCode: http.StatusInternalServerError,
+		},
+		{
+			testName: "Insert Food Trx Fail, No Token Provided",
+			init: func(req *http.Request) {
+				req.Header.Add("Content-Type", "application/json")
+			},
+			method:             "POST",
+			url:                "/foodtransactions",
+			body:               `{"food_id": 2}`,
+			expectedStatusCode: http.StatusUnauthorized,
+		},
+		{
+			testName: "Insert Food Trx Fail, Request Empty JSON",
+			init: func(req *http.Request) {
+				user := model.RegisterRequest{
+					Email:    "email11@email.com",
+					Name:     "Name",
+					Password: "password",
+				}
+				response, _ := authService.Register(user)
+
+				req.Header.Add("Content-Type", "application/json")
+				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", response.AccessToken))
+			},
+			method:             "POST",
+			url:                "/foodtransactions",
+			body:               `{}`,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			testName: "Insert Food Trx Fail, Request Empty Body",
+			init: func(req *http.Request) {
+				user := model.RegisterRequest{
+					Email:    "email12@email.com",
+					Name:     "Name",
+					Password: "password",
+				}
+				response, _ := authService.Register(user)
+
+				req.Header.Add("Content-Type", "application/json")
+				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", response.AccessToken))
+			},
+			method:             "POST",
+			url:                "/foodtransactions",
+			body:               ``,
+			expectedStatusCode: http.StatusInternalServerError,
+		},
+	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.testName, func(t *testing.T) {

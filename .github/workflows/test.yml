@@ -1,0 +1,61 @@
+name: Test
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:latest
+        env:
+          MYSQL_DATABASE: test_database
+          MYSQL_HOST: 127.0.0.1
+          MYSQL_USER: admin
+          MYSQL_PASSWORD: rootpass
+          MYSQL_ROOT_PASSWORD: rootpass
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3 --name some-mysql
+    steps:
+      - name: Checkout go
+        uses: actions/checkout@v2
+
+      - name: Setup go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17.x
+
+      - name: Import Database
+        run: docker exec -i some-mysql mysql -uadmin -prootpass test_database < docs/ffood.sql
+
+      - name: Create .env
+        run: |
+          echo "PORT=:3000" > .env
+          echo "MYSQL_HOST=MYSQL_HOST=admin:rootpass@tcp(localhost:3306)/test_database?parseTime=true" >> .env
+          echo "MYSQL_POOL_MIN=10" >> .env
+          echo "MYSQL_POOL_MAX=100" >> .env
+          echo "MYSQL_MAX_IDLE_TIME_MINUTE=1" >> .env
+          echo "MYSQL_MAX_LIFE_TIME_MINUTE=10" >> .env
+          echo "MYSQL_IDLE_MAX=10" >> .env
+          echo "MYSQL_MAX_LIFE_TIME_MINUTE=10" >> .env
+          echo "MYSQL_MAX_IDLE_TIME_MINUTE=10" >> .env
+          echo "JWT_SECRET_KEY=4f62uGVPzL7HB4xKTdr9vtIrFtLt65Jp" >> .env
+
+      - name: Create .env.test
+        run: |
+          cp .env .env.test
+
+      - name: Installing Dependencies
+        run: go mod download
+
+      - name: Build
+        run: go build .
+
+      - name: Test
+        run: go test ./test/ -v

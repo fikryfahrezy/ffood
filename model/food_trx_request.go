@@ -1,5 +1,5 @@
 package model
 
-type FoodTrxRequest struct {
-	FoodId int `json:"food_id"`
+type InsertFoodTrxRequest struct {
+	FoodId int64 `json:"food_id"`
 }

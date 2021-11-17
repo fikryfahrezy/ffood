@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/fikryfahrezy/ffood/model"
 	"github.com/fikryfahrezy/ffood/repository"
+	"github.com/fikryfahrezy/ffood/validation"
 )
 
 type FoodTrxServiceImpl struct {
@@ -15,6 +16,10 @@ func NewFoodTrxService(FoodTrxRepository *repository.FoodTrxRepository) FoodTrxS
 	}
 }
 
-func (Service FoodTrxServiceImpl) InsertFoodTrx(Request model.FoodTrxRequest, BuyerId string) (Response model.FoodTrxResponse, Error error) {
+func (Service FoodTrxServiceImpl) InsertFoodTrx(Request model.InsertFoodTrxRequest, BuyerId int64) (Response model.FoodTrxResponse, Error error) {
+	if Error = validation.InsertFoodTrxValidation(Request); Error != nil {
+		return
+	}
+	Response, Error = Service.FoodTrxRepository.InsertFoodTrx(Request, BuyerId)
 	return
 }

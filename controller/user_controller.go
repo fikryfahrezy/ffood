@@ -13,18 +13,6 @@ type UserController struct {
 	UserService service.UserService
 }
 
-func NewUserController(UserService *service.UserService) UserController {
-	return UserController{
-		UserService: *UserService,
-	}
-}
-
-func (Controller UserController) Route(App fiber.Router) {
-	router := App.Group("/user")
-	router.Get("/profile", middleware.CheckToken(), Controller.Profile)
-	router.Patch("/profile", middleware.CheckToken(), Controller.UpdateProfile)
-}
-
 func (Controller UserController) Profile(c *fiber.Ctx) error {
 	response, err := Controller.UserService.Profile(model.ProfileRequest{
 		Email: c.Locals("email").(string),
@@ -62,4 +50,16 @@ func (Controller UserController) UpdateProfile(c *fiber.Ctx) error {
 		Data:   response,
 		Error:  nil,
 	})
+}
+
+func (Controller UserController) Route(App fiber.Router) {
+	router := App.Group("/user")
+	router.Get("/profile", middleware.CheckToken(), Controller.Profile)
+	router.Patch("/profile", middleware.CheckToken(), Controller.UpdateProfile)
+}
+
+func NewUserController(UserService *service.UserService) UserController {
+	return UserController{
+		UserService: *UserService,
+	}
 }

@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/fikryfahrezy/ffood/entity"
+
 	"github.com/fikryfahrezy/ffood/config"
 	"github.com/fikryfahrezy/ffood/controller"
 	"github.com/fikryfahrezy/ffood/model"
@@ -47,13 +49,13 @@ func TestInsertFood(t *testing.T) {
 			testName: "Insert Food Success",
 			init: func(req *http.Request) {
 				authService.Register(model.RegisterRequest{
-					Email:    "email14@email.com",
+					Email:    "email1@email.com",
 					Name:     "Name",
 					Password: "password",
 				})
-				gormDb.Exec("UPDATE users SET role = 'seller' WHERE email = 'email14@email.com'")
+				gormDb.Exec("UPDATE users SET role = 'seller' WHERE email = 'email1@email.com'")
 				response, _, _ := authService.Login(model.AuthRequest{
-					Email:    "email14@email.com",
+					Email:    "email1@email.com",
 					Password: "password",
 				})
 
@@ -64,6 +66,77 @@ func TestInsertFood(t *testing.T) {
 			url:                "/foods",
 			body:               `{"name": "Food Name"}`,
 			expectedStatusCode: http.StatusOK,
+		},
+		{
+			testName: "Insert Food Fail, Empty Body JSON",
+			init: func(req *http.Request) {
+				authService.Register(model.RegisterRequest{
+					Email:    "email2@email.com",
+					Name:     "Name",
+					Password: "password",
+				})
+				gormDb.Exec("UPDATE users SET role = 'seller' WHERE email = 'email2@email.com'")
+				response, _, _ := authService.Login(model.AuthRequest{
+					Email:    "email2@email.com",
+					Password: "password",
+				})
+
+				req.Header.Add("Content-Type", "application/json")
+				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", response.AccessToken))
+			},
+			method:             "POST",
+			url:                "/foods",
+			body:               `{}`,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			testName: "Insert Food Fail, Empty Body",
+			init: func(req *http.Request) {
+				authService.Register(model.RegisterRequest{
+					Email:    "email3@email.com",
+					Name:     "Name",
+					Password: "password",
+				})
+				gormDb.Exec("UPDATE users SET role = 'seller' WHERE email = 'email3@email.com'")
+				response, _, _ := authService.Login(model.AuthRequest{
+					Email:    "email3@email.com",
+					Password: "password",
+				})
+
+				req.Header.Add("Content-Type", "application/json")
+				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", response.AccessToken))
+			},
+			method:             "POST",
+			url:                "/foods",
+			body:               ``,
+			expectedStatusCode: http.StatusInternalServerError,
+		},
+		{
+			testName: "Insert Food Fail, No Token Provided",
+			init: func(req *http.Request) {
+				req.Header.Add("Content-Type", "application/json")
+			},
+			method:             "POST",
+			url:                "/foods",
+			body:               `{}`,
+			expectedStatusCode: http.StatusUnauthorized,
+		},
+		{
+			testName: "Insert Food Fail, User Role Not Allowed",
+			init: func(req *http.Request) {
+				response, _ := authService.Register(model.RegisterRequest{
+					Email:    "email4@email.com",
+					Name:     "Name",
+					Password: "password",
+				})
+
+				req.Header.Add("Content-Type", "application/json")
+				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", response.AccessToken))
+			},
+			method:             "POST",
+			url:                "/foods",
+			body:               `{}`,
+			expectedStatusCode: http.StatusForbidden,
 		},
 	}
 
@@ -118,7 +191,7 @@ func TestGetFoods(t *testing.T) {
 
 func TestGetFood(t *testing.T) {
 	gormDb := dbInit()
-	app, _, _, _ := foodInit(gormDb)
+	app, _, _, authService := foodInit(gormDb)
 	clearDb(gormDb)
 
 	testCases := []struct {
@@ -129,10 +202,45 @@ func TestGetFood(t *testing.T) {
 		expectedStatusCode int
 	}{
 		{
-			testName:           "Food Fail, Food Not Found",
-			init:               func(req *http.Request) {},
+			testName: "Get Food Success",
+			init: func(req *http.Request) {
+				authService.Register(model.RegisterRequest{
+					Email:    "email1@email.com",
+					Name:     "Name",
+					Password: "password",
+				})
+				gormDb.Exec("UPDATE users SET role = 'seller' WHERE email = 'email1@email.com'")
+				response, _, _ := authService.Login(model.AuthRequest{
+					Email:    "email1@email.com",
+					Password: "password",
+				})
+
+				food := entity.Food{
+					Id:       1,
+					Name:     "Food Name",
+					SellerId: response.Id,
+				}
+				gormDb.Create(&food)
+
+				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", response.AccessToken))
+			},
 			method:             "GET",
-			url:                "/food/1",
+			url:                "/foods/1",
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			testName: "Get Food Fail, Food Not Found",
+			init: func(req *http.Request) {
+				response, _ := authService.Register(model.RegisterRequest{
+					Email:    "email2@email.com",
+					Name:     "Name",
+					Password: "password",
+				})
+
+				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", response.AccessToken))
+			},
+			method:             "GET",
+			url:                "/foods/9999",
 			expectedStatusCode: http.StatusNotFound,
 		},
 	}
@@ -153,7 +261,7 @@ func TestGetFood(t *testing.T) {
 
 func TestDeleteFood(t *testing.T) {
 	gormDb := dbInit()
-	app, _, _, _ := foodInit(gormDb)
+	app, _, _, authService := foodInit(gormDb)
 	clearDb(gormDb)
 
 	testCases := []struct {
@@ -161,22 +269,83 @@ func TestDeleteFood(t *testing.T) {
 		init               func(req *http.Request)
 		method             string
 		url                string
-		body               string
 		expectedStatusCode int
 	}{
 		{
-			testName:           "Delete Food Fail, Food Not Found",
+			testName: "Delete Food Success",
+			init: func(req *http.Request) {
+				authService.Register(model.RegisterRequest{
+					Email:    "email1@email.com",
+					Name:     "Name",
+					Password: "password",
+				})
+				gormDb.Exec("UPDATE users SET role = 'seller' WHERE email = 'email1@email.com'")
+				response, _, _ := authService.Login(model.AuthRequest{
+					Email:    "email1@email.com",
+					Password: "password",
+				})
+
+				food := entity.Food{
+					Id:       1,
+					Name:     "Food Name",
+					SellerId: response.Id,
+				}
+				gormDb.Create(&food)
+
+				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", response.AccessToken))
+			},
+			method:             "DELETE",
+			url:                "/foods/1",
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			testName: "Delete Food Fail, Food Not Found",
+			init: func(req *http.Request) {
+				authService.Register(model.RegisterRequest{
+					Email:    "email2@email.com",
+					Name:     "Name",
+					Password: "password",
+				})
+
+				gormDb.Exec("UPDATE users SET role = 'seller' WHERE email = 'email2@email.com'")
+				response, _, _ := authService.Login(model.AuthRequest{
+					Email:    "email2@email.com",
+					Password: "password",
+				})
+
+				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", response.AccessToken))
+			},
+			method:             "DELETE",
+			url:                "/foods/9999",
+			expectedStatusCode: http.StatusNotFound,
+		},
+		{
+			testName:           "Delete Food Fail, No Token Provided",
 			init:               func(req *http.Request) {},
 			method:             "DELETE",
-			url:                "/food/1",
-			body:               `{}`,
-			expectedStatusCode: http.StatusNotFound,
+			url:                "/foods/9999",
+			expectedStatusCode: http.StatusUnauthorized,
+		},
+		{
+			testName: "Insert Food Fail, User Role Not Allowed",
+			init: func(req *http.Request) {
+				response, _ := authService.Register(model.RegisterRequest{
+					Email:    "email3@email.com",
+					Name:     "Name",
+					Password: "password",
+				})
+
+				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", response.AccessToken))
+			},
+			method:             "DELETE",
+			url:                "/foods/999",
+			expectedStatusCode: http.StatusForbidden,
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.testName, func(t *testing.T) {
-			req := httptest.NewRequest(testCase.method, testCase.url, strings.NewReader(testCase.body))
+			req := httptest.NewRequest(testCase.method, testCase.url, nil)
 			testCase.init(req)
 
 			resp, _ := app.Test(req)
@@ -190,28 +359,145 @@ func TestDeleteFood(t *testing.T) {
 
 func TestUpdateFood(t *testing.T) {
 	gormDb := dbInit()
-	app, _, _, _ := foodInit(gormDb)
+	app, _, _, authService := foodInit(gormDb)
 	clearDb(gormDb)
 
 	testCases := []struct {
 		testName           string
 		init               func(req *http.Request)
-		after              func() bool
 		method             string
 		url                string
 		body               string
 		expectedStatusCode int
 	}{
 		{
-			testName: "Update Food Fail, Food Not Found",
-			init:     func(req *http.Request) {},
-			after: func() bool {
-				return true
+			testName: "Update Food Success",
+			init: func(req *http.Request) {
+				authService.Register(model.RegisterRequest{
+					Email:    "email1@email.com",
+					Name:     "Name",
+					Password: "password",
+				})
+				gormDb.Exec("UPDATE users SET role = 'seller' WHERE email = 'email1@email.com'")
+				response, _, _ := authService.Login(model.AuthRequest{
+					Email:    "email1@email.com",
+					Password: "password",
+				})
+
+				food := entity.Food{
+					Id:       1,
+					Name:     "Food Name",
+					SellerId: response.Id,
+				}
+				gormDb.Create(&food)
+
+				req.Header.Add("Content-Type", "application/json")
+				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", response.AccessToken))
 			},
 			method:             "PATCH",
-			url:                "/food/1",
-			body:               `{}`,
+			url:                "/foods/1",
+			body:               `{"name": "New Food Name"}`,
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			testName: "Update Food Fail, Food Not Found",
+			init: func(req *http.Request) {
+				authService.Register(model.RegisterRequest{
+					Email:    "email2@email.com",
+					Name:     "Name",
+					Password: "password",
+				})
+				gormDb.Exec("UPDATE users SET role = 'seller' WHERE email = 'email2@email.com'")
+				response, _, _ := authService.Login(model.AuthRequest{
+					Email:    "email2@email.com",
+					Password: "password",
+				})
+
+				req.Header.Add("Content-Type", "application/json")
+				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", response.AccessToken))
+			},
+			method:             "PATCH",
+			url:                "/foods/999",
+			body:               `{"name": "New Food Name"}`,
 			expectedStatusCode: http.StatusNotFound,
+		},
+		{
+			testName: "Update Food Success, Empty Body JSON",
+			init: func(req *http.Request) {
+				authService.Register(model.RegisterRequest{
+					Email:    "email3@email.com",
+					Name:     "Name",
+					Password: "password",
+				})
+				gormDb.Exec("UPDATE users SET role = 'seller' WHERE email = 'email3@email.com'")
+				response, _, _ := authService.Login(model.AuthRequest{
+					Email:    "email3@email.com",
+					Password: "password",
+				})
+
+				food := entity.Food{
+					Id:       9,
+					Name:     "Food Name",
+					SellerId: response.Id,
+				}
+				gormDb.Create(&food)
+
+				req.Header.Add("Content-Type", "application/json")
+				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", response.AccessToken))
+			},
+			method:             "PATCH",
+			url:                "/foods/9",
+			body:               `{}`,
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			testName: "Update Food Fail, Empty Body",
+			init: func(req *http.Request) {
+				authService.Register(model.RegisterRequest{
+					Email:    "email4@email.com",
+					Name:     "Name",
+					Password: "password",
+				})
+				gormDb.Exec("UPDATE users SET role = 'seller' WHERE email = 'email4@email.com'")
+				response, _, _ := authService.Login(model.AuthRequest{
+					Email:    "email4@email.com",
+					Password: "password",
+				})
+
+				req.Header.Add("Content-Type", "application/json")
+				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", response.AccessToken))
+			},
+			method:             "PATCH",
+			url:                "/foods/999",
+			body:               ``,
+			expectedStatusCode: http.StatusInternalServerError,
+		},
+		{
+			testName: "Update Food Fail, No Token Provided",
+			init: func(req *http.Request) {
+				req.Header.Add("Content-Type", "application/json")
+			},
+			method:             "PATCH",
+			url:                "/foods/999",
+			body:               `{}`,
+			expectedStatusCode: http.StatusUnauthorized,
+		},
+		{
+			testName: "Patch Food Fail, User Role Not Allowed",
+			init: func(req *http.Request) {
+				response, _ := authService.Register(model.RegisterRequest{
+					Email:    "email5@email.com",
+					Name:     "Name",
+					Password: "password",
+				})
+
+				req.Header.Add("Content-Type", "application/json")
+				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", response.AccessToken))
+			},
+			method:             "PATCH",
+			url:                "/foods/999",
+			body:               `{}`,
+			expectedStatusCode: http.StatusForbidden,
 		},
 	}
 
@@ -224,10 +510,6 @@ func TestUpdateFood(t *testing.T) {
 			if resp.StatusCode != testCase.expectedStatusCode {
 				body, _ := ioutil.ReadAll(resp.Body)
 				t.Fatal(string(body))
-			}
-
-			if !testCase.after() {
-				t.Fatal("After result is false")
 			}
 		})
 	}
