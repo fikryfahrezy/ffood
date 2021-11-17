@@ -37,7 +37,7 @@ jobs:
       - name: Create .env
         run: |
           echo "PORT=:3000" > .env
-          echo "MYSQL_HOST=MYSQL_HOST=admin:rootpass@tcp(localhost:3306)/test_database?parseTime=true" >> .env
+          echo "MYSQL_HOST=admin:rootpass@tcp(localhost:3306)/test_database?parseTime=true" >> .env
           echo "MYSQL_POOL_MIN=10" >> .env
           echo "MYSQL_POOL_MAX=100" >> .env
           echo "MYSQL_MAX_IDLE_TIME_MINUTE=1" >> .env
